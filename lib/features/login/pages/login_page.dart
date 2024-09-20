@@ -1,8 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:health_being_tips/auth_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../../global/toast_error.dart';
+import '../../../global/toast_success.dart';
 import '../../forgotpassword/pages/forgot_pwd_page.dart';
 import '../../home/pages/home_page.dart';
 import '../../signup/pages/signup_page.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,11 +23,91 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _isObscured = true;
   bool _rememberMe = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void initState(){
+    super.initState();
+    _loadPreferences();
+  }
+
+  // load user preferences
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _rememberMe = prefs.getBool('rememberMe') ?? false;
+      if (_rememberMe) {
+        _emailController.text = prefs.getString('email') ?? '';
+        _passwordController.text = prefs.getString('password') ?? '';
+      }
+    });
+  }
+  // Save user preferences
+  // Future<void> _saveUserPreferences() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   prefs.setBool('rememberMe', _rememberMe);
+  //   if (_rememberMe) {
+  //     prefs.setString('email', _emailController.text);
+  //     prefs.setString('password', _passwordController.text);
+  //   } else {
+  //     prefs.remove('email');
+  //     prefs.remove('password');
+  //   }
+  // }
+   //show error/success messages
+  // void _showMessage(String message) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(message)));
+  // }
+
+//log in method
+  Future<void> _signIn() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    //validate email and password
+    if (email.isEmpty || password.isEmpty) {
+      showToast(message: 'Fill in both details');
+      return;
+    }
+      // Call the login method from AuthProvider
+  try {
+      final rememberMe = _rememberMe;
+      final authProvider = Provider.of<MyAuthProvider>(context, listen: false);
+      await authProvider.signIn(email, password, rememberMe);
+      // Save preferences (This method should exist in your provider)
+     // await authProvider.savePreferences(_rememberMe, email, password);
+      toastSuccess(message: "Login Successful");
+
+      //Navigate to the home page after successful log in
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+    );
+  } catch (e) {
+    if (e is FirebaseAuthException) {
+      if (e.code == 'user-not-found') {
+        showToast(message:"No user found for that email.");
+      } else if (e.code == 'wrong-password') {
+        showToast(message: "Wrong password provided for that user.");
+      } else if (e.code == 'invalid-email') {
+        showToast(message: "The email address is not valid.");
+      } else {
+        showToast(message: "Invalid password or unregistered email");
+      }
+    } else {
+      showToast(message: "An unexpected error occurred: ${e.toString()}");
+
+    }
+  }
+  }
 
   @override
   Widget build(BuildContext context) {
+    //final authProvider = Provider.of<MyAuthProvider>(context);
     return Scaffold(
-        body: LayoutBuilder(
+      body: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
@@ -70,6 +158,8 @@ class _LoginPageState extends State<LoginPage> {
                                   .sizeOf(context)
                                   .height * 0.03),
                               TextField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
                                 decoration: InputDecoration(
                                   labelText: "Email",
                                   labelStyle: TextStyle(color: Colors.black54),
@@ -92,6 +182,8 @@ class _LoginPageState extends State<LoginPage> {
                                   .size
                                   .height * 0.03),
                               TextField(
+                                controller: _passwordController,
+                               // keyboardType: TextInputType.phone,
                                 decoration: InputDecoration(
                                   labelText: "Password",
                                   labelStyle: TextStyle(color: Colors.black54),
@@ -138,12 +230,10 @@ class _LoginPageState extends State<LoginPage> {
                                     style: TextStyle(fontSize: 16,),),
                                   Spacer(),
                                   GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ForgotPasswordPage()),
+                                      onTap: (){
+                                        Navigator.pushReplacement(
+                                            context,
+                                          MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
                                         );
                                       },
                                       child: Text("Forgot Password?",
@@ -158,13 +248,7 @@ class _LoginPageState extends State<LoginPage> {
                               Container(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => HomePage()),
-                                    );
-                                  },
+                                  onPressed: _signIn,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green.shade400,
                                     foregroundColor: Colors.white,
@@ -215,8 +299,11 @@ class _LoginPageState extends State<LoginPage> {
               ),
             );
           }
-          ),
-        );
+      ),
+    );
   }
 }
+
+
+
 

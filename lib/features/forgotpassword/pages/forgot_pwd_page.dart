@@ -1,8 +1,45 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ForgotPasswordPage extends StatelessWidget {
+import '../../../global/toast_error.dart';
+import '../../../global/toast_success.dart';
+
+class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
+  @override
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+}
+
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Reset password method
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim(); // Get the email input
+
+    if (email.isNotEmpty) {
+      try {
+        // Send password reset email using Firebase Auth
+        await _auth.sendPasswordResetEmail(email: email);
+        toastSuccess(message: "Password reset email sent. Please check your inbox.");
+      } catch (e) {
+        // Handle FirebaseAuth exceptions and other errors
+        if (e is FirebaseAuthException) {
+          if (e.code == 'invalid-email') {
+            showToast(message: "Invalid email address.");
+          } else if (e.code == 'user-not-found') {
+            showToast(message: "No user found for that email.");
+          }
+        } else {
+          showToast(message: "Something went wrong. Please try again.");
+        }
+      }
+    } else {
+      showToast(message: "Please enter your email");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,6 +104,8 @@ class ForgotPasswordPage extends StatelessWidget {
                               .sizeOf(context)
                               .height * 0.05),
                           TextField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
                               labelText: "Email",
                               labelStyle: TextStyle(color: Colors.black54),
@@ -94,12 +133,7 @@ class ForgotPasswordPage extends StatelessWidget {
                             child: Container(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(builder: (context) => HomePage()),
-                                  // );
-                                },
+                                onPressed: _resetPassword,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green.shade400,
                                   foregroundColor: Colors.white,
@@ -124,4 +158,5 @@ class ForgotPasswordPage extends StatelessWidget {
         )
     );
   }
-}
+
+  }
