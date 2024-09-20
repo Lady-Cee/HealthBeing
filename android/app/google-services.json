@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "950073846783",
+    "project_id": "healthbeing-322c7",
+    "storage_bucket": "healthbeing-322c7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:950073846783:android:1f94578014fa820c3615ca",
+        "android_client_info": {
+          "package_name": "com.example.health_being_tips"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9tJ2glYTSu5Vlh2_jFFJaQt_4A5W3Rt8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
