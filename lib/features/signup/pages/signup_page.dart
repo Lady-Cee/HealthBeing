@@ -19,7 +19,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-
+  final TextEditingController _nameController = TextEditingController();
   //Email validation regex
   bool _isValidEmail(String email) {
     final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
@@ -31,13 +31,14 @@ class _SignUpPageState extends State<SignUpPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
+    final name = _nameController.text.trim();
 
     //show error/success messages
     // void _showMessage(String message) {
     //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     // }
     //validate if fields are empty
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || name.isEmpty) {
       showToast(message: "Please fill in all details");
       return;
     }
@@ -59,7 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
     // Call the signUp method from AuthProvider
     try {
       final authProvider = Provider.of<MyAuthProvider>(context, listen: false);
-      await authProvider.signUp(email, password);
+      await authProvider.signUp(email, password, name);
       toastSuccess(message: "Sign up successful");
       // Navigate to login page after successful sign-up
       Navigator.pushReplacement(
@@ -127,8 +128,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                   .sizeOf(context)
                                   .height * 0.03),
                               TextField(
+                                controller: _nameController,
                                 decoration: InputDecoration(
-                                  labelText: "Full Name",
+                                  labelText: "Name",
                                   labelStyle: TextStyle(color: Colors.black54),
                                   hintText: "Enter your full name",
                                   hintStyle: TextStyle(

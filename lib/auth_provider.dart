@@ -1,3 +1,6 @@
+//import 'dart:js_interop';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,12 +34,22 @@ class MyAuthProvider with ChangeNotifier {
   }
 
 // signup method
-  Future<void> signUp(String email, String password) async {
+  Future<void> signUp(String email, String password, String name) async {
     try {
-      await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      _user = _auth.currentUser;
+      // store the user credential after creating the user
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+      );
+
+       _user = userCredential.user; //store the user in the _user variable
       notifyListeners();
+
+      // Store user's name in Firestore or Realtime Database
+      await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+        "name": name,
+        "email": email,
+      });
     } catch (e) {
       print(e);
       // handle error
