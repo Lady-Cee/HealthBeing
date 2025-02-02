@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:health_being_tips/features/forgotpassword/pages/forgot_pwd_page.dart';
 import 'package:health_being_tips/features/login/pages/login_page.dart';
@@ -14,10 +15,13 @@ import 'auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  Gemini.init(apiKey: 'AIzaSyAYaPwhuDkxkwWaN6oX29cuiK6t4hGmknM');
+  //Gemini.init(apiKey: '.env');
+  //final apikey = dotenv.env['API_KEY'] ?? '';
+  Gemini.init(apiKey: dotenv.env['GEMINI_API_KEY']!);
   runApp(const HealthBeingApp());
 }
 

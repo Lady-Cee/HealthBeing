@@ -4,13 +4,11 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-
 import '../../../global/toast_error.dart';
-import '../../geminiresult/health_guide.dart';
-import '../../login/pages/login_page.dart';
 import '../widgets/home_provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -47,6 +45,7 @@ class _HomePageState extends State<HomePage> {
     "Thyroid Disorder"
   ];
 
+  final apikey = dotenv.env['GEMINI_API_KEY'] ?? '';
   @override
   void initState() {
     super.initState();
@@ -209,7 +208,7 @@ class _HomePageState extends State<HomePage> {
                 radius: 50,
                 backgroundImage: homeProvider.userImage != null
                     ? FileImage(homeProvider.userImage!)
-                    : const AssetImage("assets/images/placeholder.png") as ImageProvider,
+                    : const AssetImage("assets/images/onboardpix.png") as ImageProvider,
                 child: homeProvider.userImage == null
                     ? Icon(Icons.camera_alt, size: 30, color: Colors.grey.shade700)
                     : null,
